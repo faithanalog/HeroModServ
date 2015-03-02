@@ -68,8 +68,9 @@ function changeMembers(player, newMems) {
 
 //Gets the full name of a party member of <player>
 function getFullName(player, partialName) {
+    var oPlayer;
     for (var i = 0; i < players.length; i++) {
-        var oPlayer = players[i];
+        oPlayer = players[i];
         if (oPlayer.partyHash === player.partyHash &&
                 oPlayer.name.indexOf(partialName) === 0) {
             return oPlayer.name;
@@ -79,9 +80,10 @@ function getFullName(player, partialName) {
 }
 
 function sendDataToParty(player, dataStr) {
-    var partyHash = player.partyHash;
+    var partyHash = player.partyHash,
+        oPlayer;
     for (var i = 0; i < players.length; i++) {
-        var oPlayer = players[i];
+        oPlayer = players[i];
         if (oPlayer !== player && oPlayer.partyHash === partyHash) {
             oPlayer.socket.write(dataStr);
         }
@@ -101,7 +103,7 @@ var serv = net.createServer(function(sock) {
     }
 
     sock.on('data', function(dataStr) {
-        var pkt;
+        var pkt, p, pos, hp, mana;
         try {
             pkt = JSON.parse(dataStr);
         } catch (e) {
@@ -114,11 +116,11 @@ var serv = net.createServer(function(sock) {
             changeHealth(player, pkt.hp);
             changeMana(player, pkt.mana);
             for (var i = 0; i < players.length; i++) {
-                var p = players[i];
+                p = players[i];
                 if (p.partyHash === player.partyHash) {
-                    var pos = new PositionPacket(p);
-                    var hp = new HealthPacket(p);
-                    var mana = new ManaPacket(p);
+                    pos = new PositionPacket(p);
+                    hp = new HealthPacket(p);
+                    mana = new ManaPacket(p);
                     sock.write(JSON.stringify(pos));
                     sock.write(JSON.stringify(hp));
                     sock.write(JSON.stringify(mana));
